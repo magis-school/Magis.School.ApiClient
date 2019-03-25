@@ -20,11 +20,11 @@ namespace Magis.School.ApiClient.Utils
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            // ggf. Authentifizierung setzen
+            // Set authentication if necessary
             if (request.Headers.Authorization != null)
                 request.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{_userName}:{_password}")));
 
-            // CORS-Header setzen
+            // Set CORS-Headers
             request.Headers.Add("X-Requested-With", "C#-API-Client");
 
             return base.SendAsync(request, cancellationToken);
