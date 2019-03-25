@@ -1,11 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyTitle>Magis School API-Client</AssemblyTitle>
+    <Authors>Magis IT GmbH</Authors>
+    <Version>1.0.0</Version>
+    <Description>C# client library for the Magis School API</Description>
+    <PackageProjectUrl>https://github.com/magis-school/Magis.School.ApiClient</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/magis-school/Magis.School.ApiClient/blob/master/LICENSE</PackageLicenseUrl>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="Refit" Version="4.6.99" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Refit" Version="4.6.99"/>
+  </ItemGroup>
 
 </Project>
