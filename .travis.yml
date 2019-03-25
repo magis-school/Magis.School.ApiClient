@@ -1,7 +1,7 @@
 language: csharp
 solution: Magis.School.ApiClient.sln
 mono: none
-dotnet: 2.2.0
+dotnet: 2.1
 
 install:
   - dotnet restore
