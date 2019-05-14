@@ -7,6 +7,8 @@ ProjectSection(SolutionItems) = preProject
 	.editorconfig = .editorconfig
 	.gitignore = .gitignore
 	.travis.yml = .travis.yml
+	README.md = README.md
+	.circleci\config.yml = .circleci\config.yml
 EndProjectSection
 EndProject
 Global
