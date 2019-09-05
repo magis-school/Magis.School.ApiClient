@@ -108,7 +108,7 @@ namespace Magis.School.ApiClient.DataObjects.Base
                 await UpdateValueAsync().ConfigureAwait(false);
 
                 Loading = false;
-                _loadingCompletionSource.SetResult(null);
+                _loadingCompletionSource.SetResult(new object());
             }
             catch (Exception ex)
             {
