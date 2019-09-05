@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Magis.School.ApiClient.Models
 {
@@ -14,15 +15,21 @@ namespace Magis.School.ApiClient.Models
 
         public string Mail { get; set; }
 
+        public ICollection<string> MailAliases { get; set; }
+
         public Enums.Role Role { get; set; }
 
-        public Enums.RoleGroup[] RoleGroups { get; set; }
+        public ICollection<Enums.RoleGroup> RoleGroups { get; set; }
 
         public DateTime CreationTime { get; set; }
 
         public string DN { get; set; }
 
         public string ProfilePath { get; set; }
+
+        public uint UID { get; set; }
+
+        public uint GID { get; set; }
 
         public string SID { get; set; }
 

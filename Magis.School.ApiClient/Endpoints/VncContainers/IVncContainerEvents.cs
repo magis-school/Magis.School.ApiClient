@@ -2,11 +2,11 @@ using System.IO;
 using System.Threading.Tasks;
 using Refit;
 
-namespace Magis.School.ApiClient.Endpoints.Computers
+namespace Magis.School.ApiClient.Endpoints.VncContainers
 {
-    public interface IComputerEvents
+    public interface IVncContainerEvents
     {
-        [Get("/api/computers/events")]
+        [Get("/api/vnc-containers/events")]
         [Headers("Authorization: Basic")]
         Task<Stream> GetEventStreamAsync();
     }

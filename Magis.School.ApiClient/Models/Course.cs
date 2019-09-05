@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Magis.School.ApiClient.Models
 {
@@ -8,12 +9,18 @@ namespace Magis.School.ApiClient.Models
 
         public string DisplayName { get; set; }
 
+        public string Mail { get; set; }
+
         public DateTime CreationTime { get; set; }
 
         public string DN { get; set; }
 
         public string SID { get; set; }
 
-        public string[] MemberDNs { get; set; }
+        public uint GID { get; set; }
+
+        public ICollection<string> Members { get; set; }
+
+        public bool LessonStarted { get; set; }
     }
 }

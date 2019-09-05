@@ -12,7 +12,7 @@ namespace Magis.School.ApiClient.Endpoints.Computers
 
         [Get("/api/computers/status/network")]
         [Headers("Authorization: Basic")]
-        Task<ComputerNetworkInfo> GetNetworkInfoAsync();
+        Task<ComputerNetworkInfo> GetNetworkInfoAsync([Query] string eventStreamId = null);
 
         [Post("/api/computers/status/heartbeat")]
         [Headers("Authorization: Basic")]
@@ -24,6 +24,6 @@ namespace Magis.School.ApiClient.Endpoints.Computers
 
         [Get("/api/computers/status/session-status")]
         [Headers("Authorization: Basic")]
-        Task<ComputerSessionStatus> GetSessionStatusAsync();
+        Task<ComputerSessionStatus> GetSessionStatusAsync([Query] string eventStreamId = null);
     }
 }

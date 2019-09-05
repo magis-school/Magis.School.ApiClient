@@ -11,7 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Refit" Version="4.6.99"/>
+    <PackageReference Include="Refit" Version="4.6.99" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="InputModels" />
   </ItemGroup>
 
 </Project>

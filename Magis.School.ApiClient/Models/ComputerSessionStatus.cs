@@ -4,7 +4,7 @@ namespace Magis.School.ApiClient.Models
     {
         public User User { get; set; }
 
-        public Enums.ActiveSessionView ActiveView { get; set; }
+        public Enums.ActiveComputerSessionView ActiveView { get; set; }
 
         public Course Course { get; set; }
 

@@ -21,5 +21,7 @@ namespace Magis.School.ApiClient.Models
         public string SID { get; set; }
 
         public uint PrimaryGroupID { get; set; }
+
+        public ComputerStatus Status { get; set; }
     }
 }

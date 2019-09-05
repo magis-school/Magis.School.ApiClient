@@ -12,7 +12,9 @@ namespace Magis.School.ApiClient.Events
 {
     internal class ServerSentEventsListener : IDisposable
     {
-        public event EventHandler<EventArgs> ListeningStarted;
+        private const string InitializationEventName = "EVENT-STREAM-ID";
+
+        public event EventHandler<ListeningStartedEventArgs> ListeningStarted;
         public event EventHandler<EventArgs> ListeningStopped;
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
         public event EventHandler<ErrorEventArgs> ErrorOccured;
@@ -28,7 +30,7 @@ namespace Magis.School.ApiClient.Events
         internal async Task StartListeningAsync(Stream eventStream)
         {
             if (_disposed)
-                throw new ObjectDisposedException(nameof(ServerSentEventsListener));
+                throw new ObjectDisposedException(GetType().FullName);
 
             if (!(eventStream ?? throw new ArgumentNullException(nameof(eventStream))).CanRead)
                 throw new ArgumentException("Event-Stream is not readable.", nameof(eventStream));
@@ -41,14 +43,13 @@ namespace Magis.School.ApiClient.Events
 
                 _listeningCts = new CancellationTokenSource();
 #pragma warning disable 4014
-                ListenForEvents(eventStream, _listeningCts.Token).ContinueWith(continuationAction: async task => {
+                ListenForEventsAsync(eventStream, _listeningCts.Token).ContinueWith(continuationAction: async task => {
                     if (task.IsFaulted && !(task.Exception?.InnerException is OperationCanceledException))
                         ErrorOccured?.Invoke(this, new ErrorEventArgs(task.Exception));
                     await StopListeningAsync().ConfigureAwait(continueOnCapturedContext: false);
                 });
 #pragma warning restore 4014
                 _listening = true;
-                ListeningStarted?.Invoke(this, EventArgs.Empty);
             }
             finally
             {
@@ -59,9 +60,9 @@ namespace Magis.School.ApiClient.Events
         internal async Task StopListeningAsync()
         {
             if (_disposed)
-                throw new ObjectDisposedException(nameof(ServerSentEventsListener));
+                throw new ObjectDisposedException(GetType().FullName);
 
-            await _listeningSemaphore.WaitAsync().ConfigureAwait(continueOnCapturedContext: false);
+            await _listeningSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
                 if (!_listening)
@@ -78,7 +79,7 @@ namespace Magis.School.ApiClient.Events
             }
         }
 
-        private async Task ListenForEvents(Stream eventStream, CancellationToken cancellationToken)
+        private async Task ListenForEventsAsync(Stream eventStream, CancellationToken cancellationToken)
         {
             using (var streamReader = new StreamReader(eventStream))
             {
@@ -95,10 +96,11 @@ namespace Magis.School.ApiClient.Events
                 string eventName = null;
                 var dataLines = new List<string>();
 
-                while (!cancellationToken.IsCancellationRequested)
+                while (true)
                 {
-                    (string key, string value) = await ReadLineAsync().ConfigureAwait(false);
+                    cancellationToken.ThrowIfCancellationRequested();
 
+                    (string key, string value) = await ReadLineAsync().ConfigureAwait(false);
                     cancellationToken.ThrowIfCancellationRequested();
 
                     switch (key)
@@ -128,8 +130,11 @@ namespace Magis.School.ApiClient.Events
                 IMessage message;
                 switch (eventName)
                 {
-                    case nameof(ComputerSessionStatusChangedMessage):
-                        message = JsonConvert.DeserializeObject<ComputerSessionStatusChangedMessage>(data);
+                    case InitializationEventName:
+                        ListeningStarted?.Invoke(this, new ListeningStartedEventArgs(data));
+                        return;
+                    case nameof(UpdateMessage):
+                        message = JsonConvert.DeserializeObject<UpdateMessage>(data);
                         break;
                     default:
                         return;

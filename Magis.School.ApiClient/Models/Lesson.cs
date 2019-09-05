@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Magis.School.ApiClient.Models
 {
@@ -12,12 +13,16 @@ namespace Magis.School.ApiClient.Models
 
         public string RoomName { get; set; }
 
+        public string SeatingPlanId { get; set; }
+
         public string DisplayName { get; set; }
 
         public DateTime LastTimeExtension { get; set; }
 
         public string Subject { get; set; }
 
-        public string[] Participants { get; set; }
+        public ICollection<string> Participants { get; set; }
+
+        public Enums.LessonPhase CurrentPhase { get; set; }
     }
 }

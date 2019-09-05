@@ -6,21 +6,15 @@ using Magis.School.ApiClient.Events;
 using Magis.School.ApiClient.Events.Messages;
 using ErrorEventArgs = Magis.School.ApiClient.Utils.ErrorEventArgs;
 
-namespace Magis.School.ApiClient.Endpoints
+namespace Magis.School.ApiClient.Endpoints.EndpointBase
 {
-    public abstract class EndpointWithEventsBase : EndpointBase, IDisposable
+    public abstract class EndpointWithEvents : Endpoint, IDisposable
     {
-        public enum EventListeningState
-        {
-            Stopped,
-            Started,
-            Restarting
-        }
+        public event EventHandler<EventListeningStateChangedEventArgs> EventListeningStateChanged;
 
-        public event EventHandler<EventArgs> EventListeningStateChanged;
         public event EventHandler<ErrorEventArgs> EventListeningErrorOccured;
 
-        protected delegate Task<Stream> QueryEventStreamAsyncDelegate();
+        public event EventHandler<DataUpdatedReceivedEventArgs> DataUpdatedReceived;
 
         public EventListeningState CurrentEventListeningState
         {
@@ -30,21 +24,22 @@ namespace Magis.School.ApiClient.Endpoints
                 if (_currentEventListeningState == value)
                     return;
                 _currentEventListeningState = value;
-                EventListeningStateChanged?.Invoke(this, EventArgs.Empty);
+                EventListeningStateChanged?.Invoke(this, new EventListeningStateChangedEventArgs(value));
             }
         }
 
+        public string EventStreamId { get; private set; }
+
         private readonly ServerSentEventsListener _sseListener;
 
-        private bool _shouldBeListening = false;
-        private QueryEventStreamAsyncDelegate _queryReconnectEventStreamDelegate = null;
+        private bool _shouldBeListening;
         private readonly SemaphoreSlim _listeningControlSemaphore = new SemaphoreSlim(1, 1);
-        private CancellationTokenSource _stopListeningCts = null;
+        private CancellationTokenSource _stopListeningCts;
         private EventListeningState _currentEventListeningState = EventListeningState.Stopped;
 
-        private bool _disposed = false;
+        private bool _disposed;
 
-        internal EndpointWithEventsBase()
+        internal EndpointWithEvents()
         {
             _sseListener = new ServerSentEventsListener();
             _sseListener.ListeningStarted += OnListeningStarted;
@@ -53,24 +48,21 @@ namespace Magis.School.ApiClient.Endpoints
             _sseListener.MessageReceived += OnMessageReceived;
         }
 
-        protected async Task StartListeningForEventsInternalAsync(QueryEventStreamAsyncDelegate queryEventStreamDelegate)
+        public async Task EnsureListeningForEventsAsync()
         {
             if (_disposed)
-                throw new ObjectDisposedException(nameof(EndpointWithEventsBase));
-            if (queryEventStreamDelegate == null)
-                throw new ArgumentNullException(nameof(queryEventStreamDelegate));
+                throw new ObjectDisposedException(GetType().FullName);
 
             // Locks until a listening-stop or a reconnect has finished
-            await _listeningControlSemaphore.WaitAsync().ConfigureAwait(continueOnCapturedContext: false);
+            await _listeningControlSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
                 if (_shouldBeListening)
-                    throw new InvalidOperationException("Endpoint is already listening for events.");
+                    return;
 
-                _queryReconnectEventStreamDelegate = queryEventStreamDelegate;
                 _stopListeningCts = new CancellationTokenSource();
 
-                await StartListeningWithRetriesAsync(queryEventStreamDelegate, _stopListeningCts.Token).ConfigureAwait(continueOnCapturedContext: false);
+                await StartListeningWithRetriesAsync(_stopListeningCts.Token).ConfigureAwait(false);
                 _shouldBeListening = true;
             }
             finally
@@ -79,23 +71,24 @@ namespace Magis.School.ApiClient.Endpoints
             }
         }
 
-        protected async Task StopListeningForEventsInternalAsync()
+        public async Task StopListeningForEventsAsync()
         {
             if (_disposed)
-                throw new ObjectDisposedException(nameof(EndpointWithEventsBase));
+                throw new ObjectDisposedException(GetType().FullName);
 
             _stopListeningCts.Cancel();
 
             // Locks until all previous tasks have been canceled
-            await _listeningControlSemaphore.WaitAsync().ConfigureAwait(continueOnCapturedContext: false);
+            await _listeningControlSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
                 if (!_shouldBeListening)
                     throw new InvalidOperationException("Endpoint is not listening for events.");
 
-                await _sseListener.StopListeningAsync().ConfigureAwait(continueOnCapturedContext: false);
+                await _sseListener.StopListeningAsync().ConfigureAwait(false);
                 _shouldBeListening = false;
 
+                EventStreamId = null;
                 CurrentEventListeningState = EventListeningState.Stopped;
             }
             finally
@@ -104,10 +97,23 @@ namespace Magis.School.ApiClient.Endpoints
             }
         }
 
-        protected internal abstract Task HandleEventMessageAsync(IMessage message);
+        protected abstract Task<Stream> QueryEventStreamAsync();
 
-        private void OnListeningStarted(object sender, EventArgs e)
+        protected virtual Task HandleEventMessageAsync(IMessage message)
         {
+            switch (message)
+            {
+                case UpdateMessage updateMessage:
+                    DataUpdatedReceived?.Invoke(this, new DataUpdatedReceivedEventArgs(updateMessage.Event, updateMessage.Context, updateMessage.Target));
+                    break;
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private void OnListeningStarted(object sender, ListeningStartedEventArgs e)
+        {
+            EventStreamId = e.EventStreamId;
             CurrentEventListeningState = EventListeningState.Started;
         }
 
@@ -116,12 +122,12 @@ namespace Magis.School.ApiClient.Endpoints
             try
             {
                 // Locks until the control-methods were completely executed because the ListeningStopped event might fire in the middle of those
-                await _listeningControlSemaphore.WaitAsync().ConfigureAwait(continueOnCapturedContext: false);
+                await _listeningControlSemaphore.WaitAsync().ConfigureAwait(false);
                 try
                 {
                     // Has the listening been interrupted?
                     if (_shouldBeListening && !_stopListeningCts.IsCancellationRequested)
-                        await StartListeningWithRetriesAsync(_queryReconnectEventStreamDelegate, _stopListeningCts.Token).ConfigureAwait(continueOnCapturedContext: false);
+                        await StartListeningWithRetriesAsync(_stopListeningCts.Token).ConfigureAwait(false);
                 }
                 finally
                 {
@@ -143,25 +149,25 @@ namespace Magis.School.ApiClient.Endpoints
         {
             try
             {
-                await HandleEventMessageAsync(e.Message).ConfigureAwait(continueOnCapturedContext: false);
+                await HandleEventMessageAsync(e.Message).ConfigureAwait(false);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                EventListeningErrorOccured?.Invoke(this,new ErrorEventArgs(ex));
+                EventListeningErrorOccured?.Invoke(this, new ErrorEventArgs(ex));
             }
         }
 
-        private async Task StartListeningWithRetriesAsync(QueryEventStreamAsyncDelegate queryEventStreamDelegate, CancellationToken cancellationToken)
+        private async Task StartListeningWithRetriesAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
                 {
                     // Query new event stream
-                    Stream eventStream = await _queryReconnectEventStreamDelegate.Invoke().ConfigureAwait(continueOnCapturedContext: false);
+                    Stream eventStream = await QueryEventStreamAsync().ConfigureAwait(false);
 
                     // Restart listening
-                    await _sseListener.StartListeningAsync(eventStream).ConfigureAwait(continueOnCapturedContext: false);
+                    await _sseListener.StartListeningAsync(eventStream).ConfigureAwait(false);
 
                     // Restart successful. Stop reconnecting
                     break;
@@ -177,18 +183,32 @@ namespace Magis.School.ApiClient.Endpoints
                 }
 
                 // Wait before reconnect
+                EventStreamId = null;
                 CurrentEventListeningState = EventListeningState.Restarting;
-                await Task.Delay(3000, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+                await Task.Delay(3000, cancellationToken).ConfigureAwait(false);
             }
         }
 
         public void Dispose()
         {
-            _stopListeningCts?.Cancel();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-            _sseListener?.Dispose();
-            _listeningControlSemaphore?.Dispose();
-            _stopListeningCts?.Dispose();
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                _stopListeningCts?.Cancel();
+
+                _sseListener?.Dispose();
+                _listeningControlSemaphore?.Dispose();
+                _stopListeningCts?.Dispose();
+            }
+
             _disposed = true;
         }
     }

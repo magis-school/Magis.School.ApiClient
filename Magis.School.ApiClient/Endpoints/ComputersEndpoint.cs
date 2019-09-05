@@ -1,7 +1,10 @@
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Magis.School.ApiClient.DataObjects.Caching;
 using Magis.School.ApiClient.Endpoints.Computers;
+using Magis.School.ApiClient.Endpoints.EndpointBase;
 using Magis.School.ApiClient.Events.Messages;
 using Magis.School.ApiClient.Utils;
 using Newtonsoft.Json;
@@ -9,49 +12,36 @@ using Refit;
 
 namespace Magis.School.ApiClient.Endpoints
 {
-    public class ComputersEndpoint : EndpointWithEventsBase
+    public sealed class ComputersEndpoint : EndpointWithEvents
     {
-        public event EventHandler<EventArgs> ComputerSessionStatusChanged;
+        public IComputerStatus Status { get; }
 
-        public IComputerStatus ComputerStatus { get; }
-        internal IComputerEvents ComputerEvents { get; }
+        public IComputerEvents Events { get; }
 
-        private readonly string _serverBackendUrl;
-        private readonly string _computerToken;
+        private readonly DataObjectCache _dataObjectCache = new DataObjectCache();
 
-        internal ComputersEndpoint(string serverBackendUrl, string computerToken, JsonSerializerSettings jsonSerializerSettings)
+        private bool _disposed;
+
+        internal ComputersEndpoint(RefitSettings refitSettings, string serverBackendUrl, string computerToken)
         {
-            _serverBackendUrl = serverBackendUrl ?? throw new ArgumentNullException(nameof(serverBackendUrl));
-            _computerToken = computerToken ?? throw new ArgumentNullException(nameof(computerToken));
+            var httpClient = new HttpClient(new ApiHttpClientHandler("computer", computerToken)) {BaseAddress = new Uri(serverBackendUrl)};
 
-            var refitSettings = new RefitSettings {
-                JsonSerializerSettings = jsonSerializerSettings,
-            };
-            var httpClient = new HttpClient(new ApiHttpClientHandler("computer", _computerToken)) {
-                BaseAddress = new Uri(serverBackendUrl)
-            };
-
-            ComputerStatus = RestService.For<IComputerStatus>(httpClient, refitSettings);
-            ComputerEvents = RestService.For<IComputerEvents>(httpClient, refitSettings);
+            Status = RestService.For<IComputerStatus>(httpClient, refitSettings);
+            Events = RestService.For<IComputerEvents>(httpClient, refitSettings);
         }
 
-        public Task StartListeningForEventsAsync()
+        protected override Task<Stream> QueryEventStreamAsync() => Events.GetEventStreamAsync();
+
+        protected override void Dispose(bool disposing)
         {
-            return StartListeningForEventsInternalAsync(queryEventStreamDelegate: () => ComputerEvents.GetEventStreamAsync());
-        }
+            if (_disposed)
+                return;
 
-        public Task StopListeningForEventsAsync() => StopListeningForEventsInternalAsync();
+            if (disposing)
+                _dataObjectCache.Dispose();
 
-        protected internal override Task HandleEventMessageAsync(IMessage message)
-        {
-            switch (message)
-            {
-                case ComputerSessionStatusChangedMessage computerSessionStatusChangedMessage:
-                    ComputerSessionStatusChanged?.Invoke(this, EventArgs.Empty);
-                    break;
-            }
-
-            return Task.CompletedTask;
+            _disposed = true;
+            base.Dispose(disposing);
         }
     }
 }
