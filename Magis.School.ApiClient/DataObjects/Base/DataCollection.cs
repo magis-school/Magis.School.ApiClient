@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Magis.School.ApiClient.DataObjects.Contexts;
@@ -8,7 +10,7 @@ using Magis.School.ApiClient.Models.Authorization;
 
 namespace Magis.School.ApiClient.DataObjects.Base
 {
-    public abstract class DataCollection<TSourceEndpoint, TItem> : DataObject<TSourceEndpoint, IList<TItem>> where TSourceEndpoint : EndpointWithEvents
+    public abstract class DataCollection<TSourceEndpoint, TItem> : DataObject<TSourceEndpoint, ObservableCollection<TItem>> where TSourceEndpoint : EndpointWithEvents
     {
         private bool _disposed;
 
@@ -24,10 +26,10 @@ namespace Magis.School.ApiClient.DataObjects.Base
 
         protected abstract TItem FindTargetInCollection(string target);
 
-        protected override async Task<(IList<TItem> value, IDictionary<string, AccessAction> availableActions)> QueryValueAsync(string eventStreamId)
+        protected override async Task<(ObservableCollection<TItem> value, IDictionary<string, AccessAction> availableActions)> QueryValueAsync(string eventStreamId)
         {
             (ICollection<TItem> collection, IDictionary<string, AccessAction> availableActions) = await QueryCollectionAsync(eventStreamId).ConfigureAwait(false);
-            return (collection.ToList(), availableActions);
+            return (new ObservableCollection<TItem>(collection), availableActions);
         }
 
         protected override void Dispose(bool disposing)

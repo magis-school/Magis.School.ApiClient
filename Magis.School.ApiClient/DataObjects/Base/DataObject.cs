@@ -15,6 +15,8 @@ namespace Magis.School.ApiClient.DataObjects.Base
     {
         public event EventHandler<ErrorEventArgs> UpdateErrorOccured;
 
+        public event EventHandler<EventArgs> ValueUpdated;
+
         protected delegate Task UpdateEventHandlerDelegate(string target = null);
 
         public TSourceEndpoint SourceEndpoint { get; }
@@ -125,6 +127,7 @@ namespace Magis.School.ApiClient.DataObjects.Base
                 Value = value;
                 AvailableActions = availableActions ?? new Dictionary<string, AccessAction>();
                 Loaded = true;
+                ValueUpdated?.Invoke(this, EventArgs.Empty);
             }
             finally
             {
