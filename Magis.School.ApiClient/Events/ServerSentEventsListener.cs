@@ -27,7 +27,7 @@ namespace Magis.School.ApiClient.Events
 
         private bool _disposed = false;
 
-        internal async Task StartListeningAsync(Stream eventStream)
+        internal async Task StartListeningAsync(Stream eventStream, CancellationToken cancellationToken = default)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().FullName);
@@ -35,19 +35,21 @@ namespace Magis.School.ApiClient.Events
             if (!(eventStream ?? throw new ArgumentNullException(nameof(eventStream))).CanRead)
                 throw new ArgumentException("Event-Stream is not readable.", nameof(eventStream));
 
-            await _listeningSemaphore.WaitAsync().ConfigureAwait(continueOnCapturedContext: false);
+            await _listeningSemaphore.WaitAsync(cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
             try
             {
                 if (_listening)
                     return;
 
                 _listeningCts = new CancellationTokenSource();
+                CancellationToken ct = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _listeningCts.Token).Token;
+
 #pragma warning disable 4014
-                ListenForEventsAsync(eventStream, _listeningCts.Token).ContinueWith(continuationAction: async task => {
+                ListenForEventsAsync(eventStream, ct).ContinueWith(continuationAction: async task => {
                     if (task.IsFaulted && !(task.Exception?.InnerException is OperationCanceledException))
                         ErrorOccured?.Invoke(this, new ErrorEventArgs(task.Exception));
                     await StopListeningAsync().ConfigureAwait(continueOnCapturedContext: false);
-                });
+                }, ct);
 #pragma warning restore 4014
                 _listening = true;
             }
@@ -125,6 +127,8 @@ namespace Magis.School.ApiClient.Events
 
         private void HandleEventReceived(string eventName, string data)
         {
+            _listeningCts.Token.ThrowIfCancellationRequested();
+
             try
             {
                 IMessage message;

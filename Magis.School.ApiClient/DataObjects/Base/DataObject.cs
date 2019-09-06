@@ -35,7 +35,11 @@ namespace Magis.School.ApiClient.DataObjects.Base
 
         protected IDictionary<UpdateEvent, UpdateEventHandlerDelegate> UpdateEventHandlers { get; } = new Dictionary<UpdateEvent, UpdateEventHandlerDelegate>();
 
+        protected CancellationToken UpdatingCancellationToken => _updatingCancellationTokenSource.Token;
+
         private TaskCompletionSource<object> _loadingCompletionSource;
+
+        private readonly CancellationTokenSource _updatingCancellationTokenSource = new CancellationTokenSource();
 
         private bool _disposed;
 
@@ -50,36 +54,40 @@ namespace Magis.School.ApiClient.DataObjects.Base
             SourceEndpoint.DataUpdatedReceived += OnDataUpdatedReceived;
         }
 
-        public async Task EnsureLoadedAsync()
+        public async Task EnsureLoadedAsync(CancellationToken cancellationToken = default)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().FullName);
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             TaskCompletionSource<object> currentCompletionSource = _loadingCompletionSource;
             if (Loading && currentCompletionSource != null)
-                await currentCompletionSource.Task.ConfigureAwait(false);
+                await Task.WhenAny(currentCompletionSource.Task, Task.Delay(-1, cancellationToken)).ConfigureAwait(false);
             else if (!Loaded)
-                await LoadAsync().ConfigureAwait(false);
+                await LoadAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task ReloadAsync()
+        public async Task ReloadAsync(CancellationToken cancellationToken = default)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().FullName);
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             TaskCompletionSource<object> currentCompletionSource = _loadingCompletionSource;
-            if (Loading && currentCompletionSource != null)
-                await currentCompletionSource.Task.ConfigureAwait(false);
+            if (!Loading || currentCompletionSource == null)
+                await LoadAsync(cancellationToken).ConfigureAwait(false);
             else
-                await LoadAsync().ConfigureAwait(false);
+                await Task.WhenAny(currentCompletionSource.Task, Task.Delay(-1, cancellationToken)).ConfigureAwait(false);
         }
 
-        public async Task ResetAsync()
+        public async Task ResetAsync(CancellationToken cancellationToken = default)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().FullName);
 
-            await ValueSemaphore.WaitAsync().ConfigureAwait(false);
+            await ValueSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 Value = default;
@@ -94,21 +102,30 @@ namespace Magis.School.ApiClient.DataObjects.Base
 
         protected abstract Task<(TValue value, IDictionary<string, AccessAction> availableActions)> QueryValueAsync(string eventStreamId);
 
-        private async Task LoadAsync()
+        private async Task LoadAsync(CancellationToken cancellationToken = default)
         {
             // Create a completion source to enable other methods to wait for loading completion
             _loadingCompletionSource = new TaskCompletionSource<object>();
+
             Loading = true;
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 // Ensure the event stream is active
-                await SourceEndpoint.EnsureListeningForEventsAsync().ConfigureAwait(false);
+                await SourceEndpoint.EnsureListeningForEventsAsync(cancellationToken).ConfigureAwait(false);
 
                 // Update value
-                await UpdateValueAsync().ConfigureAwait(false);
+                await UpdateValueAsync(cancellationToken).ConfigureAwait(false);
 
                 Loading = false;
                 _loadingCompletionSource.SetResult(new object());
+            }
+            catch (TaskCanceledException)
+            {
+                Loading = false;
+                _loadingCompletionSource.SetCanceled();
+                throw;
             }
             catch (Exception ex)
             {
@@ -117,11 +134,11 @@ namespace Magis.School.ApiClient.DataObjects.Base
             }
         }
 
-        private async Task UpdateValueAsync()
+        private async Task UpdateValueAsync(CancellationToken cancellationToken = default)
         {
             (TValue value, IDictionary<string, AccessAction> availableActions) = await QueryValueAsync(SourceEndpoint.EventStreamId).ConfigureAwait(false);
 
-            await ValueSemaphore.WaitAsync().ConfigureAwait(false);
+            await ValueSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 Value = value;
@@ -143,7 +160,7 @@ namespace Magis.School.ApiClient.DataObjects.Base
             try
             {
                 // Reload data to ensure it's up to date
-                await ReloadAsync().ConfigureAwait(false);
+                await ReloadAsync(UpdatingCancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -172,7 +189,7 @@ namespace Magis.School.ApiClient.DataObjects.Base
 
         private Task HandleValueChangedAsync(string target)
         {
-            return UpdateValueAsync();
+            return UpdateValueAsync(UpdatingCancellationToken);
         }
 
         public void Dispose()
@@ -190,7 +207,11 @@ namespace Magis.School.ApiClient.DataObjects.Base
             {
                 SourceEndpoint.EventListeningStateChanged -= OnEventListeningStateChanged;
                 SourceEndpoint.DataUpdatedReceived -= OnDataUpdatedReceived;
+
+                _updatingCancellationTokenSource.Cancel();
+
                 ValueSemaphore?.Dispose();
+                _updatingCancellationTokenSource.Dispose();
             }
 
             _disposed = true;

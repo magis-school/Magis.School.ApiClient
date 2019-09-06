@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Magis.School.ApiClient.DataObjects.Base
@@ -9,10 +10,10 @@ namespace Magis.School.ApiClient.DataObjects.Base
 
         bool Loaded { get; }
 
-        Task EnsureLoadedAsync();
+        Task EnsureLoadedAsync(CancellationToken cancellationToken = default);
 
-        Task ReloadAsync();
+        Task ReloadAsync(CancellationToken cancellationToken = default);
 
-        Task ResetAsync();
+        Task ResetAsync(CancellationToken cancellationToken = default);
     }
 }

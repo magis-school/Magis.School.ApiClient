@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Magis.School.ApiClient.DataObjects;
 using Magis.School.ApiClient.DataObjects.Caching;
@@ -40,7 +41,7 @@ namespace Magis.School.ApiClient.Endpoints
             return _dataObjectCache.GetOrAddDataObject(new DefaultDataObjectContext(), context => new VncContainerEnvironmentDataObject(this, context));
         }
 
-        protected override Task<Stream> QueryEventStreamAsync() => Events.GetEventStreamAsync();
+        protected override Task<Stream> QueryEventStreamAsync(CancellationToken cancellationToken = default) => Events.GetEventStreamAsync(cancellationToken);
 
         protected override void Dispose(bool disposing)
         {

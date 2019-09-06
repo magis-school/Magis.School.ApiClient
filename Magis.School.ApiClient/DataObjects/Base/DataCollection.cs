@@ -46,7 +46,7 @@ namespace Magis.School.ApiClient.DataObjects.Base
             // Query changed item
             TItem item = await QueryCollectionItemAsync(target, SourceEndpoint.EventStreamId).ConfigureAwait(false);
 
-            await ValueSemaphore.WaitAsync().ConfigureAwait(false);
+            await ValueSemaphore.WaitAsync(UpdatingCancellationToken).ConfigureAwait(false);
             try
             {
                 // Ensure the data is still loaded

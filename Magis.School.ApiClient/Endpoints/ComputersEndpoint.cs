@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Magis.School.ApiClient.DataObjects.Caching;
 using Magis.School.ApiClient.Endpoints.Computers;
@@ -30,7 +31,7 @@ namespace Magis.School.ApiClient.Endpoints
             Events = RestService.For<IComputerEvents>(httpClient, refitSettings);
         }
 
-        protected override Task<Stream> QueryEventStreamAsync() => Events.GetEventStreamAsync();
+        protected override Task<Stream> QueryEventStreamAsync(CancellationToken cancellationToken = default) => Events.GetEventStreamAsync(cancellationToken);
 
         protected override void Dispose(bool disposing)
         {

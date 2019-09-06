@@ -48,21 +48,22 @@ namespace Magis.School.ApiClient.Endpoints.EndpointBase
             _sseListener.MessageReceived += OnMessageReceived;
         }
 
-        public async Task EnsureListeningForEventsAsync()
+        public async Task EnsureListeningForEventsAsync(CancellationToken cancellationToken = default)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().FullName);
 
             // Locks until a listening-stop or a reconnect has finished
-            await _listeningControlSemaphore.WaitAsync().ConfigureAwait(false);
+            await _listeningControlSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 if (_shouldBeListening)
                     return;
 
                 _stopListeningCts = new CancellationTokenSource();
+                CancellationToken ct = CancellationTokenSource.CreateLinkedTokenSource(_stopListeningCts.Token, cancellationToken).Token;
 
-                await StartListeningWithRetriesAsync(_stopListeningCts.Token).ConfigureAwait(false);
+                await StartListeningWithRetriesAsync(ct).ConfigureAwait(false);
                 _shouldBeListening = true;
             }
             finally
@@ -97,7 +98,7 @@ namespace Magis.School.ApiClient.Endpoints.EndpointBase
             }
         }
 
-        protected abstract Task<Stream> QueryEventStreamAsync();
+        protected abstract Task<Stream> QueryEventStreamAsync(CancellationToken cancellationToken = default);
 
         protected virtual Task HandleEventMessageAsync(IMessage message)
         {
@@ -164,10 +165,10 @@ namespace Magis.School.ApiClient.Endpoints.EndpointBase
                 try
                 {
                     // Query new event stream
-                    Stream eventStream = await QueryEventStreamAsync().ConfigureAwait(false);
+                    Stream eventStream = await QueryEventStreamAsync(cancellationToken).ConfigureAwait(false);
 
                     // Restart listening
-                    await _sseListener.StartListeningAsync(eventStream).ConfigureAwait(false);
+                    await _sseListener.StartListeningAsync(eventStream, cancellationToken).ConfigureAwait(false);
 
                     // Restart successful. Stop reconnecting
                     break;
