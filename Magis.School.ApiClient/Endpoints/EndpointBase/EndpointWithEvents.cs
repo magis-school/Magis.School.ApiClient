@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -105,7 +106,7 @@ namespace Magis.School.ApiClient.Endpoints.EndpointBase
             switch (message)
             {
                 case UpdateMessage updateMessage:
-                    DataUpdatedReceived?.Invoke(this, new DataUpdatedReceivedEventArgs(updateMessage.Event, updateMessage.Context, updateMessage.Target));
+                    DataUpdatedReceived?.Invoke(this, new DataUpdatedReceivedEventArgs(updateMessage.Event, updateMessage.Context ?? new Dictionary<string, object>(), updateMessage.Target));
                     break;
             }
 
