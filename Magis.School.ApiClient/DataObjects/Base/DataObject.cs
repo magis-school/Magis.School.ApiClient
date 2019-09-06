@@ -187,7 +187,7 @@ namespace Magis.School.ApiClient.DataObjects.Base
             }
         }
 
-        private Task HandleValueChangedAsync(string target)
+        private Task HandleValueChangedAsync(string target = null)
         {
             return UpdateValueAsync(UpdatingCancellationToken);
         }
