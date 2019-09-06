@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Magis.School.ApiClient.Events;
 using Magis.School.ApiClient.Events.Messages;
+using Refit;
 using ErrorEventArgs = Magis.School.ApiClient.Utils.ErrorEventArgs;
 
 namespace Magis.School.ApiClient.Endpoints.EndpointBase
@@ -179,7 +180,7 @@ namespace Magis.School.ApiClient.Endpoints.EndpointBase
                     // Stop reconnecting
                     break;
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!(ex is ApiException))
                 {
                     EventListeningErrorOccured?.Invoke(this, new ErrorEventArgs(ex));
                 }
