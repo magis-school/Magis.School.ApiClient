@@ -12,11 +12,11 @@ namespace Magis.School.ApiClient.Endpoints.EndpointBase
 
         public string Target { get; }
 
-        public DataUpdatedReceivedEventArgs(UpdateEvent updateEvent, IDictionary<string, object> context, string target)
+        public DataUpdatedReceivedEventArgs(UpdateEvent updateEvent, IDictionary<string, object> context, string target = null)
         {
             UpdateEvent = updateEvent;
             Context = context ?? throw new ArgumentNullException(nameof(context));
-            Target = target ?? throw new ArgumentNullException(nameof(target));
+            Target = target;
         }
     }
 }
