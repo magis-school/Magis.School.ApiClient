@@ -131,6 +131,7 @@ namespace Magis.School.ApiClient.DataObjects.Base
             {
                 Loading = false;
                 _loadingCompletionSource.SetException(ex);
+                throw;
             }
         }
 
