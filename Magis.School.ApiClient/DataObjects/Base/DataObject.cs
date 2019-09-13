@@ -121,7 +121,7 @@ namespace Magis.School.ApiClient.DataObjects.Base
                 Loading = false;
                 _loadingCompletionSource.SetResult(new object());
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 Loading = false;
                 _loadingCompletionSource.SetCanceled();
