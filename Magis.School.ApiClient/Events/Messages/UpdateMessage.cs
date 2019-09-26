@@ -4,10 +4,10 @@ namespace Magis.School.ApiClient.Events.Messages
 {
     public class UpdateMessage : IMessage
     {
-        public UpdateEvent Event { get; }
+        public UpdateEvent Event { get; set; }
 
-        public IDictionary<string, object> Context { get; }
+        public IDictionary<string, object> Context { get; set; }
 
-        public string Target { get; }
+        public string Target { get; set; }
     }
 }
