@@ -10,6 +10,8 @@ namespace Magis.School.ApiClient.Models
 
         public ICollection<Course> Courses { get; set; }
 
+        public ICollection<Lesson> Lessons { get; set; }
+
         public Enums.ActiveVncContainerView ActiveView { get; set; }
     }
 }
