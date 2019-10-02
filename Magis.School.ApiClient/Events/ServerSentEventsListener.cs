@@ -46,9 +46,19 @@ namespace Magis.School.ApiClient.Events
 
 #pragma warning disable 4014
                 ListenForEventsAsync(eventStream, ct).ContinueWith(continuationAction: async task => {
-                    if (task.IsFaulted && !(task.Exception?.InnerException is OperationCanceledException))
-                        ErrorOccured?.Invoke(this, new ErrorEventArgs(task.Exception));
-                    await StopListeningAsync().ConfigureAwait(continueOnCapturedContext: false);
+                    try
+                    {
+                        // Report error
+                        if (task.IsFaulted && !(task.Exception?.InnerException is OperationCanceledException))
+                            ErrorOccured?.Invoke(this, new ErrorEventArgs(task.Exception));
+
+                        // Try to stop listening
+                        await StopListeningAsync().ConfigureAwait(continueOnCapturedContext: false);
+                    }
+                    catch (Exception ex)
+                    {
+                        ErrorOccured?.Invoke(this, new ErrorEventArgs(ex));
+                    }
                 }, ct);
 #pragma warning restore 4014
                 _listening = true;

@@ -130,7 +130,10 @@ namespace Magis.School.ApiClient.Endpoints.EndpointBase
                 {
                     // Has the listening been interrupted?
                     if (_shouldBeListening && !_stopListeningCts.IsCancellationRequested)
+                    {
+                        CurrentEventListeningState = EventListeningState.Restarting;
                         await StartListeningWithRetriesAsync(_stopListeningCts.Token).ConfigureAwait(false);
+                    }
                 }
                 finally
                 {
