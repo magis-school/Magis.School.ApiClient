@@ -135,7 +135,7 @@ namespace Magis.School.ApiClient.Events
                             if (eventName != null && dataLines.Any())
                                 HandleEventReceived(eventName, string.Join(Environment.NewLine, dataLines));
                             eventName = null;
-                            dataLines = new List<string>();
+                            dataLines.Clear();
                             break;
                     }
                 }
