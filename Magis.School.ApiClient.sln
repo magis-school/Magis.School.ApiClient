@@ -10,6 +10,8 @@ ProjectSection(SolutionItems) = preProject
 	.circleci\config.yml = .circleci\config.yml
 EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magis.School.ApiClient.Sample", "Magis.School.ApiClient.Sample\Magis.School.ApiClient.Sample.csproj", "{0075EB4E-8955-4053-BD74-F0961A615313}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,5 +22,9 @@ Global
 		{C20F59AB-C500-415D-9491-8E8EC2239482}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C20F59AB-C500-415D-9491-8E8EC2239482}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C20F59AB-C500-415D-9491-8E8EC2239482}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0075EB4E-8955-4053-BD74-F0961A615313}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0075EB4E-8955-4053-BD74-F0961A615313}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0075EB4E-8955-4053-BD74-F0961A615313}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0075EB4E-8955-4053-BD74-F0961A615313}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

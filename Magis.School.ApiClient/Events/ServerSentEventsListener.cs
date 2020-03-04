@@ -97,8 +97,15 @@ namespace Magis.School.ApiClient.Events
             {
                 async Task<(string key, string value)> ReadLineAsync()
                 {
-                    string line = await streamReader.ReadLineAsync().ConfigureAwait(continueOnCapturedContext: false);
-                    if (string.IsNullOrWhiteSpace(line))
+                    string line = await streamReader.ReadLineAsync().ConfigureAwait(false);
+
+                    // StreamReader might return "null" when the TCP connection has ben ungracefully closed.
+                    // More information: https://github.com/dotnet/runtime/issues/29069
+                    if (line == null)
+                        throw new EndOfStreamException("Receiving null lines. SSE connection was probably ungracefully closed.");
+
+                    line = line.Trim();
+                    if (line == string.Empty)
                         return (null, null);
                     string key = line.Substring(0, line.IndexOf(':'));
                     string value = line.Substring(key.Length + 1).TrimStart(' ');
