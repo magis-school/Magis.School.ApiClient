@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   test:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:2.2
+      - image: mcr.microsoft.com/dotnet/core/sdk:3.0
     steps:
       - checkout
       - run: dotnet restore
@@ -10,7 +10,7 @@ jobs:
       - run: dotnet test
   deploy:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:2.2
+      - image: mcr.microsoft.com/dotnet/core/sdk:3.0
     steps:
       - checkout
       - run: dotnet build -c Release
