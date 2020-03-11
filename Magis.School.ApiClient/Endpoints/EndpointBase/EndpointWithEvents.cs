@@ -191,8 +191,9 @@ namespace Magis.School.ApiClient.Endpoints.EndpointBase
                     // Stop reconnecting
                     break;
                 }
-                catch (Exception ex) when (!(ex is ApiException))
+                catch (Exception ex)
                 {
+                    // Catch and report error to ensure a reconnect can happen
                     EventListeningErrorOccured?.Invoke(this, new ErrorEventArgs(ex));
                 }
 
