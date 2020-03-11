@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyTitle>Magis School API-Client</AssemblyTitle>
     <Authors>Magis IT GmbH</Authors>
-    <Version>1.1.3</Version>
+    <Version>1.1.4</Version>
     <Description>C# client library for the Magis School API</Description>
     <PackageProjectUrl>https://github.com/magis-school/Magis.School.ApiClient</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/magis-school/Magis.School.ApiClient/blob/master/LICENSE</PackageLicenseUrl>
