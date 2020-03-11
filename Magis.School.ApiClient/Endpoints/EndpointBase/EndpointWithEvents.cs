@@ -12,6 +12,8 @@ namespace Magis.School.ApiClient.Endpoints.EndpointBase
 {
     public abstract class EndpointWithEvents : Endpoint, IDisposable
     {
+        private const int PauseBeforeReconnect = 3000;
+
         public event EventHandler<EventListeningStateChangedEventArgs> EventListeningStateChanged;
 
         public event EventHandler<ErrorEventArgs> EventListeningErrorOccured;
@@ -131,7 +133,13 @@ namespace Magis.School.ApiClient.Endpoints.EndpointBase
                     // Has the listening been interrupted?
                     if (_shouldBeListening && !_stopListeningCts.IsCancellationRequested)
                     {
+                        EventStreamId = null;
                         CurrentEventListeningState = EventListeningState.Restarting;
+
+                        // Wait before reconnect
+                        await Task.Delay(PauseBeforeReconnect, _stopListeningCts.Token).ConfigureAwait(false);
+
+                        // Try a reconnect
                         await StartListeningWithRetriesAsync(_stopListeningCts.Token).ConfigureAwait(false);
                     }
                 }
@@ -188,10 +196,11 @@ namespace Magis.School.ApiClient.Endpoints.EndpointBase
                     EventListeningErrorOccured?.Invoke(this, new ErrorEventArgs(ex));
                 }
 
-                // Wait before reconnect
                 EventStreamId = null;
                 CurrentEventListeningState = EventListeningState.Restarting;
-                await Task.Delay(3000, cancellationToken).ConfigureAwait(false);
+
+                // Wait before reconnect
+                await Task.Delay(PauseBeforeReconnect, cancellationToken).ConfigureAwait(false);
             }
         }
 
