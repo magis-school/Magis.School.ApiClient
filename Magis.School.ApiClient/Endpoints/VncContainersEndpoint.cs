@@ -28,7 +28,7 @@ namespace Magis.School.ApiClient.Endpoints
 
         internal VncContainersEndpoint(RefitSettings refitSettings, string serverBackendUrl, string vncContainerName, string apiToken)
         {
-            var httpClient = new HttpClient(new ApiHttpClientHandler(vncContainerName, apiToken)) {BaseAddress = new Uri(serverBackendUrl)};
+            var httpClient = new HttpClient(new BasicAuthApiHttpClientHandler(vncContainerName, apiToken)) {BaseAddress = new Uri(serverBackendUrl)};
 
             Status = RestService.For<IVncContainerStatus>(httpClient, refitSettings);
             Events = RestService.For<IVncContainerEvents>(httpClient, refitSettings);

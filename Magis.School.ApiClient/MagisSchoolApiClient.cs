@@ -18,6 +18,8 @@ namespace Magis.School.ApiClient
             _refitSettings = new RefitSettings {ContentSerializer = new JsonContentSerializer(new JsonSettings()),};
         }
 
+        public WebEndpoint Web() => new WebEndpoint(_refitSettings, ServerBackendUrl);
+
         public ComputersEndpoint Computers(string computerToken) => new ComputersEndpoint(_refitSettings, ServerBackendUrl, computerToken);
 
         public VncContainersEndpoint VncContainers(string vncContainerName, string apiToken) =>

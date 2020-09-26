@@ -55,7 +55,7 @@ namespace Magis.School.ApiClient.DataObjects.Base
 
                 // Update collection
                 TItem existingItem = FindTargetInCollection(target);
-                int existingItemIndex = Value.IndexOf(existingItem);
+                int existingItemIndex = existingItem != null ? Value.IndexOf(existingItem) : -1;
                 if (existingItemIndex >= 0 && item != null)
                     Value[existingItemIndex] = item;
                 else if (existingItemIndex >= 0)

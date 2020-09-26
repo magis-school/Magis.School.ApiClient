@@ -11,8 +11,6 @@ namespace Magis.School.ApiClient.DataObjects
 {
     public sealed class VncContainerEnvironmentDataObject : DataObject<VncContainersEndpoint, VncContainerEnvironment>
     {
-        private bool _disposed;
-
         public VncContainerEnvironmentDataObject(VncContainersEndpoint endpoint, DefaultDataObjectContext context) : base(endpoint, context,
             UpdateEvent.VncContainerEnvironmentChanged) { }
 
@@ -20,15 +18,6 @@ namespace Magis.School.ApiClient.DataObjects
         {
             VncContainerEnvironment result = await SourceEndpoint.Status.GetEnvironmentAsync(eventStreamId).ConfigureAwait(false);
             return (result, null);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (_disposed)
-                return;
-
-            _disposed = true;
-            base.Dispose(disposing);
         }
     }
 }

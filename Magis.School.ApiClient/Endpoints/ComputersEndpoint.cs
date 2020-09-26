@@ -25,7 +25,7 @@ namespace Magis.School.ApiClient.Endpoints
 
         internal ComputersEndpoint(RefitSettings refitSettings, string serverBackendUrl, string computerToken)
         {
-            var httpClient = new HttpClient(new ApiHttpClientHandler("computer", computerToken)) {BaseAddress = new Uri(serverBackendUrl)};
+            var httpClient = new HttpClient(new BasicAuthApiHttpClientHandler("computer", computerToken)) {BaseAddress = new Uri(serverBackendUrl)};
 
             Status = RestService.For<IComputerStatus>(httpClient, refitSettings);
             Events = RestService.For<IComputerEvents>(httpClient, refitSettings);

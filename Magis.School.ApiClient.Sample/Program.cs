@@ -3,14 +3,14 @@ using System.Threading.Tasks;
 using Magis.School.ApiClient.DataObjects;
 using Magis.School.ApiClient.Endpoints;
 using Magis.School.ApiClient.Endpoints.EndpointBase;
+using Magis.School.ApiClient.Models;
 
 namespace Magis.School.ApiClient.Sample
 {
-    // This sample application demonstrates how a vnc container could use the api-client
-    // to retrieve information and update-events about its current environment.
+    // This sample application demonstrates how to authenticate against the school server API and query some data.
     public static class Program
     {
-        private const string ServerBackendUrl = "http://10.200.1.1";
+        private const string ServerBackendUrl = "https://backend.beta-schule.de";
 
         public static async Task Main(string[] args)
         {
@@ -21,33 +21,36 @@ namespace Magis.School.ApiClient.Sample
             // Create API client object
             var apiClient = new MagisSchoolApiClient(ServerBackendUrl);
 
-            // Configure endpoint and authenticate as vnc-container
-            VncContainersEndpoint vncContainersEndpoint = apiClient.VncContainers("vnc-container-test-admin-officialappsbeta-libreoffice-7b823492-b0b6-4e60-a050-f78b8e2aa010",
-                "f7b6c6b1f31599b3972d3b97ed0a1667");
+            // Configure endpoint and authenticate
+            WebEndpoint webEndpoint = apiClient.Web();
+            User user = await webEndpoint.Auth.LoginAsync(new UserCredentialsInput {UserNameOrMail = "test.benutzer", Password = "Test123"}).ConfigureAwait(false);
 
             // Log "low-level" SSE events for clarity/debugging
-            vncContainersEndpoint.DataUpdatedReceived += (sender, eventArgs) => Console.WriteLine($"SSE Update-Event: {eventArgs.UpdateEvent} {eventArgs.Target}");
-            vncContainersEndpoint.EventListeningErrorOccured += (sender, eventArgs) => Console.WriteLine($"SSE Listening Error: {eventArgs.Exception}");
-            vncContainersEndpoint.EventListeningStateChanged += (sender, eventArgs) => Console.WriteLine($"SSE Listening State Changed: {eventArgs.State}");
+            webEndpoint.DataUpdatedReceived += (sender, eventArgs) => Console.WriteLine($"SSE Update-Event: {eventArgs.UpdateEvent} {eventArgs.Target}");
+            webEndpoint.EventListeningErrorOccured += (sender, eventArgs) => Console.WriteLine($"SSE Listening Error: {eventArgs.Exception}");
+            webEndpoint.EventListeningStateChanged += (sender, eventArgs) => Console.WriteLine($"SSE Listening State Changed: {eventArgs.State}");
 
-            Console.WriteLine("Querying data and watching for updates...");
+            // Query apps and watch for updates
+            AppsDataCollection apps = webEndpoint.GetApps();
+            await apps.EnsureLoadedAsync().ConfigureAwait(false);
 
-            // Query container environment as self-managing data object (gets updated automatically)
-            VncContainerEnvironmentDataObject vncContainerEnvironment =  vncContainersEndpoint.GetVncContainerEnvironment();
-            await vncContainerEnvironment.EnsureLoadedAsync().ConfigureAwait(false);
+            // Query vnc containers and watch for updates
+            VncContainersDataCollection vncContainers = webEndpoint.GetVncContainers();
+            await vncContainers.EnsureLoadedAsync().ConfigureAwait(false);
 
-            // You can work with this data object now...
+            // You can work with these data objects/collections now. They will be updated automatically, if they change on the server.
+
+            await Task.Delay(1500000);
 
             // Wait for application exit
             await exitingTcs.Task.ConfigureAwait(false);
-
             Console.WriteLine("Exiting...");
 
             // Cleanup
-            vncContainerEnvironment.Dispose();
-            if (vncContainersEndpoint.CurrentEventListeningState != EventListeningState.Stopped)
-                await vncContainersEndpoint.StopListeningForEventsAsync().ConfigureAwait(false);
-            vncContainersEndpoint.Dispose();
+            apps.Dispose();
+            if (webEndpoint.CurrentEventListeningState != EventListeningState.Stopped)
+                await webEndpoint.StopListeningForEventsAsync().ConfigureAwait(false);
+            webEndpoint.Dispose();
         }
     }
 }
