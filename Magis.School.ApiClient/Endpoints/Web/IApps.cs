@@ -16,5 +16,8 @@ namespace Magis.School.ApiClient.Endpoints.Web
         [Get("/api/web/apps/{appName}")]
         Task<DataAndAccessResponse<App>> GetAppAsync(string appName, [Query] string eventStreamId = null, [Query] bool checkExists = false,
             CancellationToken cancellationToken = default);
+
+        [Post("/api/web/apps/{appName}/start")]
+        Task<string> StartAppAsync(string appName);
     }
 }
