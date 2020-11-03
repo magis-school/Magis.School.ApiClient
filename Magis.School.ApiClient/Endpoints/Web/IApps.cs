@@ -17,7 +17,8 @@ namespace Magis.School.ApiClient.Endpoints.Web
         Task<DataAndAccessResponse<App>> GetAppAsync(string appName, [Query] string eventStreamId = null, [Query] bool checkExists = false,
             CancellationToken cancellationToken = default);
 
+        // TODO: Because of a bug in the server (backend#60) the api call fails when no empty json object is sent.
         [Post("/api/web/apps/{appName}/start")]
-        Task<string> StartAppAsync(string appName);
+        Task<string> StartAppAsync(string appName, [Body] Dictionary<string,string> empty);
     }
 }
