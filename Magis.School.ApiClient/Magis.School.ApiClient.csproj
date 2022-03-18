@@ -5,7 +5,7 @@
     <AssemblyTitle>Magis School API-Client</AssemblyTitle>
     <Authors>Magis IT GmbH</Authors>
     <Company>Magis IT GmbH</Company>
-    <VersionNumber>1.4.0</VersionNumber>
+    <Version>1.4.1</Version>
     <Product>Magis School API-Client</Product>
     <Title>Magis School API-Client</Title>
     <Description>C# client library for the Magis School API</Description>
