@@ -75,5 +75,11 @@ namespace Magis.School.ApiClient
             Paused,
             Stopping
         }
+
+        [JsonConverter(typeof(StringEnumConverter))]
+        public enum FavoriteType
+        {
+            Course = 0
+        }
     }
 }

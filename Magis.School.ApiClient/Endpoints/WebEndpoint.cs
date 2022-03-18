@@ -22,6 +22,8 @@ namespace Magis.School.ApiClient.Endpoints
 
         public ICourses Courses { get; }
 
+        public IFavorites Favorites { get; }
+
         public IVncContainers VncContainers { get; }
 
         public IWebEvents Events { get; }
@@ -37,6 +39,7 @@ namespace Magis.School.ApiClient.Endpoints
             Auth = RestService.For<IWebAuth>(httpClient, refitSettings);
             Apps = RestService.For<IApps>(httpClient, refitSettings);
             Courses = RestService.For<ICourses>(httpClient, refitSettings);
+            Favorites = RestService.For<IFavorites>(httpClient, refitSettings);
             VncContainers = RestService.For<IVncContainers>(httpClient, refitSettings);
             Events = RestService.For<IWebEvents>(httpClient, refitSettings);
         }
@@ -54,6 +57,14 @@ namespace Magis.School.ApiClient.Endpoints
                 throw new ObjectDisposedException(GetType().FullName);
 
             return _dataObjectCache.GetOrAddDataObject(new DefaultDataObjectContext(), context => new CoursesDataCollection(this, context));
+        }
+
+        public FavoritesDataCollection GetFavorites()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().FullName);
+
+            return _dataObjectCache.GetOrAddDataObject(new DefaultDataObjectContext(), context => new FavoritesDataCollection(this, context));
         }
 
         public VncContainersDataCollection GetVncContainers()

@@ -39,6 +39,10 @@ namespace Magis.School.ApiClient.Sample
             CoursesDataCollection courses = webEndpoint.GetCourses();
             await courses.EnsureLoadedAsync().ConfigureAwait(false);
 
+            // Query favorites and watch for updates
+            FavoritesDataCollection favorites = webEndpoint.GetFavorites();
+            await favorites.EnsureLoadedAsync().ConfigureAwait(false);
+
             // Query vnc containers and watch for updates
             VncContainersDataCollection vncContainers = webEndpoint.GetVncContainers();
             await vncContainers.EnsureLoadedAsync().ConfigureAwait(false);
