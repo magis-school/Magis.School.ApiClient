@@ -10,13 +10,23 @@
     <Title>Magis School API-Client</Title>
     <Description>C# client library for the Magis School API</Description>
     <Copyright>Copyright 2022 © Magis IT GmbH</Copyright>
-    <PackageProjectUrl>https://github.com/magis-school/Magis.School.ApiClient</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/MagisIT/Magis.School.ApiClient</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReleaseNotes>https://github.com/magis-school/Magis.School.ApiClient/releases</PackageReleaseNotes>
-    <RepositoryUrl>https://github.com/magis-school/Magis.School.ApiClient</RepositoryUrl>
+    <PackageReleaseNotes>https://github.com/MagisIT/Magis.School.ApiClient/releases</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/MagisIT/Magis.School.ApiClient</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
+ <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Version>$(VersionNumber)</Version>
+    <Version Condition=" '$(BuildNumber)' != '' ">$(VersionNumber)-$(BuildNumber)</Version>
+  </PropertyGroup>
+   
   <ItemGroup>
     <PackageReference Include="Refit" Version="4.6.99" />
   </ItemGroup>
