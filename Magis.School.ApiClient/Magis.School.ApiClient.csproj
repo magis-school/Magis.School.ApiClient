@@ -4,10 +4,18 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyTitle>Magis School API-Client</AssemblyTitle>
     <Authors>Magis IT GmbH</Authors>
+    <Company>Magis IT GmbH</Company>
     <Version>1.3.1</Version>
+    <Product>Magis School API-Client</Product>
+    <Title>Magis School API-Client</Title>
     <Description>C# client library for the Magis School API</Description>
+    <Copyright>Copyright 2022 © Magis IT GmbH</Copyright>
     <PackageProjectUrl>https://github.com/magis-school/Magis.School.ApiClient</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/magis-school/Magis.School.ApiClient/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReleaseNotes>https://github.com/magis-school/Magis.School.ApiClient/releases</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/magis-school/Magis.School.ApiClient</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
