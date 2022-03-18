@@ -1,0 +1,51 @@
+name: Build and Publish
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    name: Test Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup .NET Core 6.0
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+      - run: donet test -c Release --verbosity normal
+
+  deploy:
+    name: Publish Nuget Packages
+    runs-on: ubuntu-latest
+
+    # Runs only on commits to master or when creating a tag
+    if: github.ref == 'refs/heads/master' || contains(github.ref, 'refs/tags/')
+    needs: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup .NET Core 6.0
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+      - name: Create Packages
+        if: github.ref == 'refs/heads/master'
+        run: |
+          BUILD_NUMBER=$(git rev-parse --short HEAD)
+          dotnet pack Magis.School.ApiClient -c Release -o packages -p:BuildNumber=$BUILD_NUMBER
+      - name: Create Release-Packages
+        if: contains(github.ref, 'refs/tags/')
+        run: |
+          dotnet pack Magis.School.ApiClient -c Release -o packages
+      - name: Push to GitHub Packages
+        run: dotnet nuget push "packages/*.nupkg" -s https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json -k ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+      - name: Push to nuget.org
+        if: contains(github.ref, 'refs/tags/')
+        run: dotnet nuget push "packages/*.nupkg" -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_API_KEY}} --skip-duplicate
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: packages
+          path: packages/
