@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Magis.School.ApiClient.DataObjects;
 using Magis.School.ApiClient.Endpoints;
@@ -34,11 +35,13 @@ namespace Magis.School.ApiClient.Sample
             AppsDataCollection apps = webEndpoint.GetApps();
             await apps.EnsureLoadedAsync().ConfigureAwait(false);
 
+            // Query courses and watch for updates
+            CoursesDataCollection courses = webEndpoint.GetCourses();
+            await courses.EnsureLoadedAsync().ConfigureAwait(false);
+
             // Query vnc containers and watch for updates
             VncContainersDataCollection vncContainers = webEndpoint.GetVncContainers();
             await vncContainers.EnsureLoadedAsync().ConfigureAwait(false);
-
-            // You can work with these data objects/collections now. They will be updated automatically, if they change on the server.
 
             await Task.Delay(1500000);
 

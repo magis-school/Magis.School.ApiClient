@@ -20,6 +20,8 @@ namespace Magis.School.ApiClient.Endpoints
 
         public IApps Apps { get; }
 
+        public ICourses Courses { get; }
+
         public IVncContainers VncContainers { get; }
 
         public IWebEvents Events { get; }
@@ -34,6 +36,7 @@ namespace Magis.School.ApiClient.Endpoints
 
             Auth = RestService.For<IWebAuth>(httpClient, refitSettings);
             Apps = RestService.For<IApps>(httpClient, refitSettings);
+            Courses = RestService.For<ICourses>(httpClient, refitSettings);
             VncContainers = RestService.For<IVncContainers>(httpClient, refitSettings);
             Events = RestService.For<IWebEvents>(httpClient, refitSettings);
         }
@@ -43,6 +46,14 @@ namespace Magis.School.ApiClient.Endpoints
             if (_disposed)
                 throw new ObjectDisposedException(GetType().FullName);
             return _dataObjectCache.GetOrAddDataObject(new DefaultDataObjectContext(), context => new AppsDataCollection(this, context));
+        }
+
+        public CoursesDataCollection GetCourses()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().FullName);
+
+            return _dataObjectCache.GetOrAddDataObject(new DefaultDataObjectContext(), context => new CoursesDataCollection(this, context));
         }
 
         public VncContainersDataCollection GetVncContainers()
