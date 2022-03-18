@@ -11,7 +11,6 @@
     <Description>C# client library for the Magis School API</Description>
     <Copyright>Copyright 2022 © Magis IT GmbH</Copyright>
     <PackageProjectUrl>https://github.com/magis-school/Magis.School.ApiClient</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/magis-school/Magis.School.ApiClient/blob/master/LICENSE</PackageLicenseUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReleaseNotes>https://github.com/magis-school/Magis.School.ApiClient/releases</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/magis-school/Magis.School.ApiClient</RepositoryUrl>
