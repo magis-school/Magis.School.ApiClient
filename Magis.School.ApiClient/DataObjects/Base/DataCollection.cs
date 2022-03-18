@@ -14,6 +14,8 @@ namespace Magis.School.ApiClient.DataObjects.Base
     {
         private bool _disposed;
 
+        public event EventHandler<EventArgs> CollectionItemUpdated;
+
         internal DataCollection(TSourceEndpoint sourceEndpoint, DataObjectContext context, UpdateEvent collectionChangedEvent, UpdateEvent collectionItemChangedEvent) : base(
             sourceEndpoint, context, collectionChangedEvent)
         {
@@ -62,6 +64,8 @@ namespace Magis.School.ApiClient.DataObjects.Base
                     Value.RemoveAt(existingItemIndex);
                 else if (item != null)
                     Value.Add(item);
+
+                CollectionItemUpdated?.Invoke(this, EventArgs.Empty);
             }
             finally
             {
