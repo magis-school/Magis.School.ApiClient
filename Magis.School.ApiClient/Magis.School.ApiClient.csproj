@@ -4,12 +4,29 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyTitle>Magis School API-Client</AssemblyTitle>
     <Authors>Magis IT GmbH</Authors>
+    <Company>Magis IT GmbH</Company>
     <Version>1.4.1</Version>
+    <Product>Magis School API-Client</Product>
+    <Title>Magis School API-Client</Title>
     <Description>C# client library for the Magis School API</Description>
-    <PackageProjectUrl>https://github.com/magis-school/Magis.School.ApiClient</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/magis-school/Magis.School.ApiClient/blob/master/LICENSE</PackageLicenseUrl>
+    <Copyright>Copyright 2022 © Magis IT GmbH</Copyright>
+    <PackageProjectUrl>https://github.com/MagisIT/Magis.School.ApiClient</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReleaseNotes>https://github.com/MagisIT/Magis.School.ApiClient/releases</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/MagisIT/Magis.School.ApiClient</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
+ <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Version>$(VersionNumber)</Version>
+    <Version Condition=" '$(BuildNumber)' != '' ">$(VersionNumber)-$(BuildNumber)</Version>
+  </PropertyGroup>
+   
   <ItemGroup>
     <PackageReference Include="Refit" Version="4.6.99" />
   </ItemGroup>
