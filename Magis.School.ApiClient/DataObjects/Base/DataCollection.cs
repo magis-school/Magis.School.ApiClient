@@ -22,7 +22,7 @@ namespace Magis.School.ApiClient.DataObjects.Base
 
         protected abstract Task<(ICollection<TItem> collection, IDictionary<string, AccessAction> availableActions)> QueryCollectionAsync(string eventStreamId);
 
-        protected abstract Task<TItem> QueryCollectionItemAsync(string target, string eventStreamId);
+        protected abstract Task<TItem> QueryCollectionItemAsync(string target);
 
         protected abstract TItem FindTargetInCollection(string target);
 
@@ -44,7 +44,7 @@ namespace Magis.School.ApiClient.DataObjects.Base
         private async Task HandleCollectionItemChangedAsync(string target)
         {
             // Query changed item
-            TItem item = await QueryCollectionItemAsync(target, SourceEndpoint.EventStreamId).ConfigureAwait(false);
+            TItem item = await QueryCollectionItemAsync(target).ConfigureAwait(false);
 
             await ValueSemaphore.WaitAsync(UpdatingCancellationToken).ConfigureAwait(false);
             try

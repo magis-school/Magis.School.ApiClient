@@ -39,6 +39,8 @@ namespace Magis.School.ApiClient.Events
         FileShareChanged,
         AllFileSharesChanged,
         FileShareForPathChanged,
-        AllFileSharesForPathChanged
+        AllFileSharesForPathChanged,
+        FavoriteChanged,
+        AllFavoritesChanged
     }
 }
