@@ -22,9 +22,9 @@ namespace Magis.School.ApiClient.DataObjects
             return (result.Entries, result.AvailableActions);
         }
 
-        protected override Task<DataAndAccessResponse<Course>> QueryCollectionItemAsync(string target, string eventStreamId)
+        protected override Task<DataAndAccessResponse<Course>> QueryCollectionItemAsync(string target)
         {
-            return SourceEndpoint.Courses.GetCourseAsync(target, eventStreamId, true);
+            return SourceEndpoint.Courses.GetCourseAsync(target, null, true);
         }
 
         protected override DataAndAccessResponse<Course> FindTargetInCollection(string target) => Value.FirstOrDefault(i => i.Entry.Name == target);

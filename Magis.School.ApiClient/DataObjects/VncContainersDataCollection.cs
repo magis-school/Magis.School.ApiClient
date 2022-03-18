@@ -25,9 +25,9 @@ namespace Magis.School.ApiClient.DataObjects
         }
 
         /// <inheritdoc />
-        protected override Task<DataAndAccessResponse<VncContainer>> QueryCollectionItemAsync(string target, string eventStreamId)
+        protected override Task<DataAndAccessResponse<VncContainer>> QueryCollectionItemAsync(string target)
         {
-            return SourceEndpoint.VncContainers.GetVncContainerAsync(target, eventStreamId, true);
+            return SourceEndpoint.VncContainers.GetVncContainerAsync(target, null, true);
         }
 
         /// <inheritdoc />

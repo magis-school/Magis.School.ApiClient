@@ -23,9 +23,9 @@ namespace Magis.School.ApiClient.DataObjects
             return (result, null);
         }
 
-        protected override Task<Favorite> QueryCollectionItemAsync(string target, string eventStreamId)
+        protected override Task<Favorite> QueryCollectionItemAsync(string target)
         {
-            return SourceEndpoint.Favorites.GetFavoriteAsync(target, eventStreamId, true);
+            return SourceEndpoint.Favorites.GetFavoriteAsync(target, null, true);
         }
 
         protected override Favorite FindTargetInCollection(string target)

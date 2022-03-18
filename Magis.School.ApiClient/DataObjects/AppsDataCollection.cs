@@ -25,9 +25,9 @@ namespace Magis.School.ApiClient.DataObjects
         }
 
         /// <inheritdoc />
-        protected override Task<DataAndAccessResponse<App>> QueryCollectionItemAsync(string target, string eventStreamId)
+        protected override Task<DataAndAccessResponse<App>> QueryCollectionItemAsync(string target)
         {
-            return SourceEndpoint.Apps.GetAppAsync(target, eventStreamId, true);
+            return SourceEndpoint.Apps.GetAppAsync(target, null, true);
         }
 
         /// <inheritdoc />
