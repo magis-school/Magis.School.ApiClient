@@ -41,6 +41,7 @@ namespace Magis.School.ApiClient.Sample
 
             // Query favorites and watch for updates
             FavoritesDataCollection favorites = webEndpoint.GetFavorites();
+            favorites.CollectionItemUpdated += (sender, eventArgs) => Console.WriteLine("Favorites updated");
             await favorites.EnsureLoadedAsync().ConfigureAwait(false);
 
             // Query lessons and watch for updates
