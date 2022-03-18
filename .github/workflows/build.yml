@@ -13,7 +13,7 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '6.0.x'
-      - run: donet test -c Release --verbosity normal
+      - run: dotnet test -c Release --verbosity normal
 
   deploy:
     name: Publish Nuget Packages
